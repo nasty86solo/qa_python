@@ -18,53 +18,48 @@ class TestBooksCollector:
     def test_add_new_book_add_max_symbol(self, collector, book_name, expected_result):
 
         collector.add_new_book(book_name)
-        assert book_name in collector.books_genre == expected_result
+        assert (book_name in collector.books_genre) == expected_result
 
     def test_add_book_twice_add_one(self, collector):
 
-        collector.add_new_book(book_name)
         book_name = 'Сияющий'
-
-        self.collector.add_new_book(book_name)
-        assert book_name in self.collector.books_genre
-
-        self.collector.add_new_book(book_name)
-        assert len(self.collector.books_genre) == 1
-        assert book_name in self.collector.books_genre
+        collector.add_new_book(book_name)
+        collector.add_new_book(book_name)
+        
+        assert len(collector.books_genre) == 1
+        assert book_name in collector.books_genre
 
     @pytest.mark.parametrize("book_name, genre, expected_genre",
         [
             ['Тёмный эльф', 'Фантастика', 'Фантастика'],
-            ['Я убиваю', 'Детектив', 'Детектив'],
+            ['Я убиваю', 'Детективы', 'Детективы'],
         ])
 
     def test_set_book_genre_add_true_genge(self, collector, book_name, genre, expected_genre):
 
         collector.add_new_book(book_name)
-        
-        self.collector.set_book_genre(book_name, genre)
-        assert self.collector.get_book_genre(book_name) == expected_genre
+        collector.set_book_genre(book_name, genre)
+        assert collector.get_book_genre(book_name) == expected_genre
 
-    def test_get_book_genre_existing_book(collector):
+    def test_get_book_genre_existing_book(self, collector):
         
         book_name = 'Собака Баскервилей'
-        collector.add_new_book(book_name)
         genre = 'Ужасы'
+        collector.add_new_book(book_name)
         collector.set_book_genre(book_name, genre)
-        book_genre = collector.get_book_genre(book_name)
-        assert book_genre == genre
+        assert collector.get_book_genre(book_name) == genre
         
-    def test_get_books_with_specific_genre_fantasy_will_be_fantasy(collector):
+    def test_get_books_with_specific_genre_fantasy_will_be_fantasy(self, collector):
 
         collector.add_new_book('Тёмный эльф')
         collector.add_new_book('Эрагон')
         collector.set_book_genre('Тёмный эльф', 'Фантастика')
-        collector.set_book_genre('Эрагон', 'Фантасика')
+        collector.set_book_genre('Эрагон', 'Фантастика')
 
         result = collector.get_books_with_specific_genre('Фантастика')
         assert result == ['Тёмный эльф', 'Эрагон']
 
-    def test_get_books_genre_empty_on_new_books(collector):
+    def test_get_books_genre_empty_on_new_books(self, collector):
 
         collector.add_new_book('Книга')
     
@@ -73,17 +68,16 @@ class TestBooksCollector:
 
     def test_get_books_genre_single_book_in_genre_one_book_in_dict(self, collector):
 
-        collector.add_new_book(book_name)
         book_name = 'Book'
         genre = 'Фантастика'
-        self.collector.add_new_book(book_name)
-        self.collector.set_book_genre(book_name, genre)
+        collector.add_new_book(book_name)
+        collector.set_book_genre(book_name, genre)
 
         expected = {book_name: genre}
-        result = self.collector.get_books_genre()
+        result = collector.get_books_genre()
         assert result == expected
 
-    def test_get_books_genre_returns_all_books_with_genres(collector):
+    def test_get_books_genre_returns_all_books_with_genres(self, collector):
 
         collector.add_new_book('Книга 1')
         collector.set_book_genre('Книга 1', 'Фантастика')
@@ -95,7 +89,7 @@ class TestBooksCollector:
     }
         assert collector.get_books_genre() == expected
 
-    def test_get_books_for_children_book_child(collector):
+    def test_get_books_for_children_book_child(self, collector):
 
         collector.add_new_book('Мультфильм')
         collector.add_new_book('Комедия')
@@ -107,23 +101,37 @@ class TestBooksCollector:
 
         result = collector.get_books_for_children()
         assert result == ['Мультфильм', 'Комедия']
-
-    @pytest.mark.parametrize("book_name, expected_result",
+      
+    @pytest.mark.parametrize("book_name, expected_result", 
         [
-            ("Избранная книга", True),
-            ("Уже в избранном", False),
-            ("Недобавленная книга", False)
+            ["Избранная книга", True],
+            ["Недобавленная книга", False]
         ])
-
     def test_add_book_in_favorites_new_book_once(self, collector, book_name, expected_result):
+    
+        if expected_result:
+            collector.add_new_book(book_name)
+        collector.add_book_in_favorites(book_name)
+        assert (book_name in collector.favorites) == expected_result
 
+    def test_add_book_in_favorites_twice(self, collector):
+    
+        book_name = "Уже в избранном"
         collector.add_new_book(book_name)
-        self.collector.add_new_book(book_name)
-        self.collector.add_book_in_favorites(book_name)
+        collector.add_book_in_favorites(book_name)
+        assert book_name in collector.favorites
+    
+        collector.add_book_in_favorites(book_name)
+        assert len(collector.favorites) == 1
+        assert book_name in collector.favorites
 
-        assert (book_name in self.collector.favorites) == expected_result
+    def test_add_nonexistent_book_to_favorites(self, collector):
+    
+        book_name = "Несуществующая книга"
+        collector.add_book_in_favorites(book_name)
+        assert book_name not in collector.favorites
 
-    def test_delete_book_from_favorites_no_book_from_del(collector):
+    def test_delete_book_from_favorites_no_book_from_del(self, collector):
 
         collector.add_new_book("Книга для удаления")
         collector.add_book_in_favorites("Книга для удаления")
@@ -131,7 +139,7 @@ class TestBooksCollector:
         collector.delete_book_from_favorites("Книга для удаления")
         assert "Книга для удаления" not in collector.favorites
 
-    def test_get_list_of_favorites_books_single_book_in_favor(collector):
+    def test_get_list_of_favorites_books_single_book_in_favor(self, collector):
 
         collector.add_new_book('Избранное')
         collector.add_book_in_favorites('Избранное')
